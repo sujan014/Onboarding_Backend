@@ -20,15 +20,24 @@ namespace Task1_API.Controllers
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [Produces(typeof(IEnumerable<ProductViewModel>))]
         public async Task<IActionResult> GetProducts()
         {
-            var products = await _productService.GetProducts();
-            return Ok(products);
+            try
+            {
+                var products = await _productService.GetProducts();
+                return Ok(products);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [Produces(typeof(ProductViewModel))]
         public async Task<IActionResult> GetProduct(int id)
@@ -44,10 +53,10 @@ namespace Task1_API.Controllers
             }
         }
 
-        [HttpPost("createproduct")]
+        [HttpPost("createProduct")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [Produces(typeof(ProductViewModel))]
         public async Task<IActionResult> CreateProduct([FromBody] CreateProductRequest request)
         {
@@ -55,17 +64,23 @@ namespace Task1_API.Controllers
             {
                 return BadRequest(ModelState);
             }
-            var productRequest = await _productService.CreateProduct(request);
-            return Ok(productRequest);
+            try
+            {
+                var productRequest = await _productService.CreateProduct(request);
+                return Ok(productRequest);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
-        [HttpPost("updateproduct")]
+        [HttpPut("updateProduct/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [Produces(typeof(ProductViewModel))]
-        public async Task<IActionResult> UpdateProduct(int? id, [FromBody] UpdateProductRequest? request)
+        public async Task<IActionResult> UpdateProduct(int? id, [FromBody] UpdateProductRequest request)
         {
             if (id == null || !ModelState.IsValid)
             {
@@ -82,20 +97,21 @@ namespace Task1_API.Controllers
             }
         }
 
-        [HttpPost("deleteproduct")]
+        [HttpDelete("deleteProduct/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DeleteProduct(int id)
         {
             try
             {
                 await _productService.DeleteProduct(id);
+                return Ok();
             }
             catch (Exception ex)
             {
                 return NotFound(ex.Message);
             }
-            return Ok();
         }
     }
 }

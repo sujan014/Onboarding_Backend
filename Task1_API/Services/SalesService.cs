@@ -15,55 +15,94 @@ namespace Task1_API.Services
             _context = context;
             _mapper = mapper;
         }
-        public async Task<SalesViewModel?> GetSalesById(int id)
+        public async Task<SalesViewModel> GetSalesById(int id)
         {
-            var sales = await _context.Sales.FirstOrDefaultAsync(product => product.Id == id);
-            return _mapper.Map<SalesViewModel>(sales);
+            try
+            {
+                var sales = await _context.Sales.FirstOrDefaultAsync(product => product.Id == id);
+                if (sales == null)
+                {
+                    throw new Exception();
+                }
+                return _mapper.Map<SalesViewModel>(sales);
+            }
+            catch
+            {
+                throw new Exception(message: "Error - Invalid Sales Id.");
+            }
         }
-        public async Task<IEnumerable<SalesViewModel?>> GetSales()
+        public async Task<IEnumerable<SalesViewModel>> GetSales()
         {
-            var sales = await _context.Sales.ToListAsync();
-            return _mapper.Map<List<SalesViewModel>>(sales);
+            try
+            {
+                var sales = await _context.Sales.ToListAsync();
+                return _mapper.Map<List<SalesViewModel>>(sales);
+            }
+            catch
+            {
+                throw new Exception(message: "Error - Cannot get Sales List.");
+            }
         }
         
-        public async Task<SalesViewModel?> CreateSales(CreateSalesRequest request)
+        public async Task<SalesViewModel> CreateSales(CreateSalesRequest request)
         {
-            var sales = new Sales
+            try
             {
-                ProductId = request.ProductId,
-                CustomerId= request.CustomerId,
-                StoreId =request.StoreId,
-                DateSold= request.DateSold,
-            };
-            _context.Sales.Add(sales);
-            await _context.SaveChangesAsync();
-            return _mapper.Map<SalesViewModel>(sales);
+                var sales = new Sales
+                {
+                    ProductId = request.ProductId,
+                    CustomerId = request.CustomerId,
+                    StoreId = request.StoreId,
+                    DateSold = request.DateSold,
+                };
+                _context.Sales.Add(sales);
+                await _context.SaveChangesAsync();
+                return _mapper.Map<SalesViewModel>(sales);
+            }
+            catch
+            {
+                throw new Exception(message: "Error - Cannot create Sales");
+            }
         }                
 
         public async Task<SalesViewModel?> UpdateSales(int id, UpdateSalesRequest request)
         {
-            var sales = await _context.Sales.FirstOrDefaultAsync(item => item.Id == id);
-            if (sales == null)
+            try
             {
-                return null;
+                var sales = await _context.Sales.FirstOrDefaultAsync(item => item.Id == id);
+                if (sales == null)
+                {
+                    throw new Exception();
+                }
+                sales.ProductId = request.ProductId;
+                sales.CustomerId = request.CustomerId;
+                sales.StoreId = request.StoreId;
+                sales.DateSold = request.DateSold;
+                _context.Sales.Update(sales);
+                await _context.SaveChangesAsync();
+                return _mapper.Map<SalesViewModel>(sales);
             }
-            sales.ProductId = request.ProductId;
-            sales.CustomerId = request.CustomerId;
-            sales.StoreId = request.StoreId;
-            sales.DateSold = request.DateSold;
-            _context.Sales.Update(sales);
-            await _context.SaveChangesAsync();
-            return _mapper.Map<SalesViewModel>(sales);
+            catch
+            {
+                throw new Exception(message: "Error - Cannot update Sales");
+            }
         }
         public async Task DeleteSales(int id)
         {
-            var sales = await _context.Sales.FirstOrDefaultAsync(item => item.Id==id);
-            if (sales == null)
+            try
             {
-                throw new Exception("Invalid ID");
+                var sales = await _context.Sales.FirstOrDefaultAsync(item => item.Id == id);
+                if (sales == null)
+                {
+                    throw new Exception();
+                }
+                _context.Sales.Remove(sales);
+                await _context.SaveChangesAsync();
             }
-            _context.Sales.Remove(sales);
-            await _context.SaveChangesAsync();
+            catch
+            {
+                throw new Exception(message: "Error - Cannot delete Sales.");
+            }
         }
     }
 }

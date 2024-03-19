@@ -57,8 +57,8 @@ namespace Task1_API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<float>("Price")
-                        .HasColumnType("real");
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
@@ -93,7 +93,7 @@ namespace Task1_API.Migrations
 
                     b.HasIndex("StoreId");
 
-                    b.ToTable("sales");
+                    b.ToTable("Sales");
                 });
 
             modelBuilder.Entity("Task1_API.Models.Store", b =>

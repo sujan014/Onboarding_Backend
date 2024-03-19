@@ -19,16 +19,25 @@ namespace Task1_API.Controllers
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [Produces(typeof(IEnumerable<StoreViewModel>))]
         public async Task<IActionResult> GetStores()
         {
-            var stores = await _storeService.GetStores();
-            return Ok(stores);
+            try
+            {
+                var stores = await _storeService.GetStores();
+                return Ok(stores);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         // HTTP GET -> localhost:5555/api/Store/{id}
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [Produces(typeof(StoreViewModel))]
         public async Task<IActionResult> GetStore(int id)
@@ -43,11 +52,11 @@ namespace Task1_API.Controllers
                 return NotFound(ex.Message);
             }
         }
-        // HTTP Post -> localhost:5555/api/Store/createstore
-        [HttpPost("createstore")]
+        // HTTP Post -> localhost:5555/api/Store/createStore
+        [HttpPost("createStore")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [Produces(typeof(StoreViewModel))]
         public async Task<IActionResult> CreateStore([FromBody] CreateStoreRequest request)
         {
@@ -55,14 +64,21 @@ namespace Task1_API.Controllers
             {
                 return BadRequest(ModelState);
             }
-            var storeRequest = await _storeService.CreateStore(request);
-            return Ok(storeRequest);
+            try
+            {
+                var storeRequest = await _storeService.CreateStore(request);
+                return Ok(storeRequest);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
-        // HTTP Post -> localhost:5555/api/Store/updatestore
-        [HttpPost("updatestore")]
+        // HTTP Post -> localhost:5555/api/Store/updateStore/id
+        [HttpPut("updateStore/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [Produces(typeof(StoreViewModel))]
         public async Task<IActionResult> UpdateStore(int? id, [FromBody] UpdateStoreRequest request)
         {
@@ -70,28 +86,32 @@ namespace Task1_API.Controllers
             {
                 return BadRequest(ModelState);
             }
-            var storeRequest = await _storeService.UpdateStore((int)id, request);
-            if (storeRequest== null)
+            try
             {
-                return NotFound("Id not found");
+                var storeRequest = await _storeService.UpdateStore((int)id, request);
+                return Ok(storeRequest);
             }
-            return Ok(storeRequest);
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
-        // HTTP POST -> localhost:5555/api/Store/delete
-        [HttpPost("deletestore")]
+        // HTTP POST -> localhost:5555/api/Store/deleteStore/id
+        [HttpDelete("deleteStore/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DeleteStore(int id)
         {
             try
             {
                 await _storeService.DeleteStore(id);
+                return Ok();
             }
             catch (Exception ex)
             {                
                 return NotFound(ex.Message);
             }
-            return Ok();
         }
     }
 }

@@ -19,15 +19,24 @@ namespace Task1_API.Controllers
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [Produces(typeof(IEnumerable<CustomerViewModel>))]
         public async Task<IActionResult> GetCustomers()
         {
-            var customers = await _customerService.GetCustomers();
-            return Ok(customers);
+            try
+            {
+                var customers = await _customerService.GetCustomers();
+                return Ok(customers);
+            }
+            catch(Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
         
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [Produces(typeof(CustomerViewModel))]
         public async Task<IActionResult> GetCustomer(int id)
@@ -43,10 +52,10 @@ namespace Task1_API.Controllers
             }
         }
 
-        [HttpPost("createcustomer")]
+        [HttpPost("createCustomer")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [Produces(typeof(CustomerViewModel))]
         public async Task<IActionResult> CreateCustomer([FromBody]CreateCustomerRequest request)
         {
@@ -54,17 +63,23 @@ namespace Task1_API.Controllers
             {
                 return BadRequest(ModelState);
             }
-            var customerRequest = await _customerService.CreateCustomer(request);
-            return Ok(customerRequest);
+            try
+            {
+                var customerRequest = await _customerService.CreateCustomer(request);
+                return Ok(customerRequest);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
-        [HttpPost("updatecustomer")]
+        [HttpPut("updateCustomer/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]        
         [Produces(typeof(CustomerViewModel))]
-        public async Task<IActionResult> UpdateCustomer(int? id, [FromBody]UpdateCustomerRequest? request)
+        public async Task<IActionResult> UpdateCustomer(int? id, [FromBody]UpdateCustomerRequest request)
         {
             if (id == null || !ModelState.IsValid)
             {
@@ -81,20 +96,21 @@ namespace Task1_API.Controllers
             }
         }
 
-        [HttpPost("deletecustomer")]
+        [HttpDelete("deleteCustomer/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]        
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DeleteCustomer(int id)
         {
             try
             {
-                await _customerService.DeleteCustomer(id);                
+                await _customerService.DeleteCustomer(id);
+                return Ok();
             }
             catch(Exception ex)
             {
                 return NotFound(ex.Message);
-            }
-            return Ok();
+            }            
         }
     }
 }

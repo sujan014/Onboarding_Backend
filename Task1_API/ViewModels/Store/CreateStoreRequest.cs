@@ -5,7 +5,7 @@ namespace Task1_API.ViewModels.Store
     public class CreateStoreRequest
     {
         [Required]
-        [RegularExpression(@"^.{3,}$", ErrorMessage = "Minimum 3 characters required")]
+        [RegularExpression(@"^.{3,}$", ErrorMessage = "Name must have minimum 3 characters.")]
         public string Name { get; set; }
 
         [Required]

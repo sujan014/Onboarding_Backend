@@ -16,49 +16,88 @@ namespace Task1_API.Services
             _context = context;
             _mapper = mapper;
         }
-        public async Task<ProductViewModel?> GetProductById(int id)
+        public async Task<ProductViewModel> GetProductById(int id)
         {
-            var product = await _context.Products.FirstOrDefaultAsync(product => product.Id == id);
-            return _mapper.Map<ProductViewModel>(product);
-        }
-        public async Task<IEnumerable<ProductViewModel?>> GetProducts()
-        {
-            var products = await _context.Products.ToListAsync();
-            return _mapper.Map<List<ProductViewModel>>(products);
-        }
-        public async Task<ProductViewModel?> CreateProduct(CreateProductRequest request)
-        {
-            var product = new Product
+            try
             {
-                Name = request.Name,
-                Price = request.Price,
-            };
-            _context.Products.Add(product);
-            await _context.SaveChangesAsync();
-            return _mapper.Map<ProductViewModel>(product);
-        }        
-        public async Task<ProductViewModel?> UpdateProduct(int id, UpdateProductRequest request)
-        {
-            var product = await _context.Products.FirstOrDefaultAsync(item => item.Id == id);
-            if (product == null)
-            {
-                return null;
+                var product = await _context.Products.FirstOrDefaultAsync(product => product.Id == id);
+                if (product == null)
+                {
+                    throw new Exception();
+                }
+                return _mapper.Map<ProductViewModel>(product);
             }
-            product.Name = request.Name;
-            product.Price = request.Price;
-            _context.Products.Update(product);
-            await _context.SaveChangesAsync();
-            return _mapper.Map<ProductViewModel>(product);
+            catch
+            {
+                throw new Exception(message: "Error - Invalid Product Id.");
+            }
+        }
+        public async Task<IEnumerable<ProductViewModel>> GetProducts()
+        {
+            try
+            {
+                var products = await _context.Products.ToListAsync();
+                return _mapper.Map<List<ProductViewModel>>(products);
+            }
+            catch
+            {
+                throw new Exception(message: "Error - Cannot get Products List.");
+            }
+        }
+        public async Task<ProductViewModel> CreateProduct(CreateProductRequest request)
+        {
+            try
+            {
+                var product = new Product
+                {
+                    Name = request.Name,
+                    Price = request.Price,
+                };
+                _context.Products.Add(product);
+                await _context.SaveChangesAsync();
+                return _mapper.Map<ProductViewModel>(product);
+            }
+            catch
+            {
+                throw new Exception(message: "Error - Cannot create Product");
+            }
+        }        
+        public async Task<ProductViewModel> UpdateProduct(int id, UpdateProductRequest request)
+        {
+            try
+            {
+                var product = await _context.Products.FirstOrDefaultAsync(item => item.Id == id);
+                if (product == null)
+                {
+                    throw new Exception();
+                }
+                product.Name = request.Name;
+                product.Price = request.Price;
+                _context.Products.Update(product);
+                await _context.SaveChangesAsync();
+                return _mapper.Map<ProductViewModel>(product);
+            }
+            catch
+            {
+                throw new Exception(message: "Error - Cannot update Product.");
+            }
         }
         public async Task DeleteProduct(int id)
         {
-            var product = await _context.Products.FirstOrDefaultAsync(item => item.Id == id);            
-            if (product == null)
+            try
             {
-                throw new Exception("Invalid Id.");
-            }            
-            _context.Products.Remove(product);
-            await _context.SaveChangesAsync();            
+                var product = await _context.Products.FirstOrDefaultAsync(item => item.Id == id);
+                if (product == null)
+                {
+                    throw new Exception();
+                }
+                _context.Products.Remove(product);
+                await _context.SaveChangesAsync();
+            }
+            catch
+            {
+                throw new Exception(message: "Error - Cannot delete Product.");
+            }
         }        
     }
 }

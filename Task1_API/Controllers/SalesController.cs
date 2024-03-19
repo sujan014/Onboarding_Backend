@@ -19,15 +19,24 @@ namespace Task1_API.Controllers
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [Produces(typeof(IEnumerable<SalesViewModel>))]
         public async Task<IActionResult> GetSales()
         {
-            var sales = await _salesService.GetSales();
-            return Ok(sales);
+            try
+            {
+                var sales = await _salesService.GetSales();
+                return Ok(sales);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [Produces(typeof(SalesViewModel))]
         public async Task<IActionResult> GetSales(int id)
@@ -43,7 +52,7 @@ namespace Task1_API.Controllers
             }
         }
 
-        [HttpPost("createsales")]
+        [HttpPost("createSales")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -54,11 +63,19 @@ namespace Task1_API.Controllers
             {
                 return BadRequest(ModelState);
             }
-            var sales = await _salesService.CreateSales(request);
-            return Ok(sales);
+            try
+            {
+                var sales = await _salesService.CreateSales(request);
+                return Ok(sales);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+
         }
 
-        [HttpPost("updatesales")]
+        [HttpPut("updateSales/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -69,15 +86,20 @@ namespace Task1_API.Controllers
             {
                 return BadRequest(ModelState);
             }
-            var sales = await _salesService.UpdateSales((int)id, request);
-            if (sales == null) {
-                return NotFound("Id not found");
+            try
+            {
+                var sales = await _salesService.UpdateSales((int)id, request);
+                return Ok(sales);
             }
-            return Ok(sales);
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
-        [HttpPost("deletesales")]
+        [HttpDelete("deleteSales/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DeleteSales(int id)
         {
